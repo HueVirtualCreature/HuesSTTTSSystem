@@ -4,7 +4,7 @@
  A solution live speech recognition and voice synthesis
 
 ## Usage
-Access the utility here (Use Google Chrome): [https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly](https://huevirtualcreature.github.io/CaptionNinjaSpeaketh/microphone "https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly")
+Access the utility here (Use Google Chrome): [https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly](https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly "https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly")
 
 ### Instructions
 
