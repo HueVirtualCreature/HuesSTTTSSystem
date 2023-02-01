@@ -1,7 +1,7 @@
 
 # Hue's STTTS System
  
- A solution live speech recognition and voice synthesis
+ A solution for live speech recognition and voice synthesis
 
 ## Usage
 Access the utility here (Use Google Chrome): [https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly](https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly "https://huevirtualcreature.github.io/HuesSTTTSSystem/MicrophonePolly")
