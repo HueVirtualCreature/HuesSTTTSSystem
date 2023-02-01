@@ -1,0 +1,645 @@
+<html>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css">
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.828.0.min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+	<script
+		src="https://code.jquery.com/jquery-3.1.1.min.js"
+		integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+		crossorigin="anonymous"></script>
+	<script src="semantic/dist/semantic.min.js"></script>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+	<meta content="utf-8" http-equiv="encoding" />
+	<meta name="copyright" content="&copy; 2022 Hue_vCreature" />
+	<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
+
+	<!-- Primary Meta Tags -->
+	<title>Hue's STTTS System (AWS Polly)</title>
+	<meta name="title" content="HSTTTSSys" />
+	<meta name="description"
+		content="A captioning service developed by Hue_vCreature, which is derived from Steve Seguin's CAPTION.Ninja" />
+	<meta name="author" content="Hue_vCreature" />
+
+	<style>
+		.noselect {
+			-webkit-touch-callout: none; /* iOS Safari */
+			-webkit-user-select: none; /* Safari */
+			-khtml-user-select: none; /* Konqueror HTML */
+			-moz-user-select: none; /* Old versions of Firefox */
+			-ms-user-select: none; /* Internet Explorer/Edge */
+			user-select: none; /* Non-prefixed version, currently
+								supported by Chrome, Edge, Opera and Firefox */
+		}
+
+		body {
+			overflow: hidden;
+			font-family: "Open Sans", sans-serif;
+		}
+
+		#main-container {
+			width: 90% !important;
+		}
+
+		.output {
+			margin: 0;
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 1.5em;
+			padding: 0.1em;
+			border: lightgray 2px solid;
+			min-height: 90px;
+			max-height: 300px;
+			overflow-y: auto;
+			overflow-x: hidden;
+			overflow-wrap: anywhere;
+		}
+
+		input#userinput
+		{
+			width: 100%;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="main-container" class="ui fluid container grid stackable noselect">
+		<div class="row" translate="no" >
+			<div class="sixteen wide column">
+				<div class="ui top attached menu">
+					<h1 class="ui header">
+						<i class="microphone icon"></i>
+						<div class="content">
+							Hue's STTTS System
+							<div class="sub header">Speech to Text to Speech System - By HueVirtualCreature</div>
+						</div>
+					</h1>
+					<div class="right menu" translate="no">
+						<div class="ui right aligned">
+							<button class="ui button" translate="no" onclick="getOverlayLink()">Copy Overlay Link</button>
+							<div class="ui input">
+								<input id="awsRegionTextBox" type="password" placeholder="region..." autocomplete="off">
+							  </div>
+							<div class="ui action input">
+								<input id="awsIdentityPoolTextBox" type="password" placeholder="IdentityPoolId..." autocomplete="off">
+								<button class="ui button" onclick="awsConnectButton_onclick()">Connect</button>
+							  </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="sixteen wide column"  translate="no">
+				<div class="ui fluid card">
+					<div class="content">
+						<div class="header">Transcription</div>
+					</div>
+					<div class="content">
+						<div id="output" translate="no" class="output">
+							<p>Transcribed speech automatically populates this panel.</p>
+							<p>Microphone permissions are required.</p>
+						</div>
+					</div>
+					<div class="extra content" style="height: 150px;">
+						<button class="ui icon circular button negative" id="microphonebutton" onclick="microphonebutton_onclick()">
+							<i class="microphone icon"></i>
+							Start/Pause Speech Recognition
+						</button>
+						<button class="ui icon circular button negative" id="syncVoiceAndCaptionsButton" onclick="syncVoiceAndCaptionsButton_onClick()">
+							<i class="share icon"></i>
+							Send with Voice
+						</button>
+						<select class="ui dropdown" id="audio-devices-dropdown" onchange="audioOutputDeviceDropdown_onChange()">
+							<option value="default">Please Select an Audio Output Device</option>
+						</select>
+						<h5>* Will use browser's default audio device if there is no selection</h5>
+						<select class="ui dropdown" id="voice-options-dropdown" onchange="voiceOptionsDropdown_onChange()">
+							<option value="default">Please Select a Voice</option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row" translate="no" >
+			<div class="sixteen wide column">
+				<div class="ui labeled input fluid">
+					<div class="ui label action blue">
+						Manual Input
+					</div>
+					<input type="text" id="userinput" placeholder="Manually insert a message">
+					<button class="ui button blue" onclick="manualEntry()">Send</button>
+				</div>
+			</div>
+		</div>
+		<div class="ui divider"></div>
+		<div translate="no" class="row">
+			<div class="eight wide column">
+				<div class="ui icon message">
+					<i id="status-icon" class="notched circle loading icon"></i>
+					<div class="content">
+					  <p id="status-message">Initializing</p>
+					</div>
+				  </div>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		//Global Scope
+		const STATUS_ICONS = {
+			LOADING: "orange notched circle loading icon",
+			AUDIOOUT: "green volume up icon",
+			AUDIOIN: "blue microphone icon",
+			AUDIOINDISABLE: "red microphone slash icon",
+			SEND: "blue cloud upload icon",
+			RECIEVE: "green cloud download icon",
+			ERROR: "red close icon",
+			SETTING: "green cog icon",
+			COMPLETE: "green check circle outline icon"
+		};
+		const WEBSOCKET_STATES = {
+			CONNECTING: 0,
+			OPEN: 1,
+			CLOSING: 2,
+			CLOSED: 3
+		};
+
+		const DEFAULT_SPEAKERID = "Matthew";
+		var delaySendingCaptions = false;
+		var last_manual_entry = "";
+		var recognition = null;
+		var pauseSpeech = false;
+		var roomID = "test";
+		var apiKey = false;
+		var socket = new WebSocket("wss://api.caption.ninja:443");
+		var label = false;
+		var counter = 0;
+		var myLang = "en-US";
+		var selectedAudioDevice = null;
+		var selectedVoice = DEFAULT_SPEAKERID;
+		var twitch_Token = null;
+		var final_transcript = '';
+		var awsConnected = false;
+		//Global Scope
+
+		async function awsConnectButton_onclick() {
+			let regionTextBoxValue = document.getElementById("awsRegionTextBox")?.value || null;
+			let identityPoolIDTextBoxValue = document.getElementById("awsIdentityPoolTextBox")?.value || null;
+
+			if (!regionTextBoxValue || !identityPoolIDTextBoxValue) return;
+			initializeAWS(regionTextBoxValue, identityPoolIDTextBoxValue);
+		}
+
+		function initializeAWS(region, identityPoolID) {
+			speechStatusUpdate("Setting AWS Config", STATUS_ICONS.SETTING);
+
+			// Initialize the Amazon Cognito credentials provider
+			AWS.config.region = region;
+			AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+				IdentityPoolId: identityPoolID
+			});
+
+			awsConnected = true;
+			writeCookies("awsRegion", region);
+			writeCookies("awsCredentials", identityPoolID);
+			getAvailableSpeakers();
+		}
+
+		function writeCookies(key, value) {
+			document.cookie = `${key}=${value}`;
+			console.log(document.cookie);
+		}
+
+		function getCookies() {
+			let cookie = document.cookie;
+		}
+
+		function getCookie(cname) {
+			let name = cname + "=";
+			let ca = document.cookie.split(';');
+			for(let i = 0; i < ca.length; i++) {
+				let c = ca[i];
+				while (c.charAt(0) == ' ') {
+				c = c.substring(1);
+				}
+				if (c.indexOf(name) == 0) {
+				return c.substring(name.length, c.length);
+				}
+			}
+			return "";
+		}
+
+		function dynamicSort(property) {
+			var sortOrder = 1;
+			if(property[0] === "-") {
+				sortOrder = -1;
+				property = property.substr(1);
+			}
+			return function (a,b) {
+				/* next line works with strings and numbers, 
+				* and you may want to customize it to your needs
+				*/
+				var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+				return result * sortOrder;
+			}
+		}
+
+		function dynamicSortMultiple() {
+			/*
+			* save the arguments object as it will be overwritten
+			* note that arguments object is an array-like object
+			* consisting of the names of the properties to sort by
+			*/
+			var props = arguments;
+			return function (obj1, obj2) {
+				var i = 0, result = 0, numberOfProperties = props.length;
+				/* try getting a different result from 0 (equal)
+				* as long as we have extra properties to compare
+				*/
+				while(result === 0 && i < numberOfProperties) {
+					result = dynamicSort(props[i])(obj1, obj2);
+					i++;
+				}
+				return result;
+			}
+		}
+
+		function getAvailableSpeakers () {
+			if (awsConnected === false) return;
+
+			speechStatusUpdate("Retrieving AWS Polly voices", STATUS_ICONS.RECIEVE);
+			// Create the Polly service object and presigner object
+			var polly = new AWS.Polly({apiVersion: '2016-06-10'});
+
+			polly.describeVoices({}, function(err, data) {
+				if (err) { speechStatusUpdate(`Failed to retireve available voices from server`, STATUS_ICONS.ERROR); console.log(err, err.stack); } // an error occurred
+				else {
+					speechStatusUpdate(`Retrieved available voices from server`, STATUS_ICONS.RECIEVE);
+					let options = document.getElementById("voice-options-dropdown");
+					data.Voices.filter(voice => ("en-AU | en-GB | en-GB-WLS | en-IN | en-US | ja-JP").includes(voice.LanguageCode)).sort(dynamicSortMultiple("LanguageCode", "Name")).forEach(voice => {
+						let newOption = document.createElement("option");
+							newOption.setAttribute("value", voice.Id);
+							newOption.innerHTML = `${voice.Name} (${voice.LanguageCode})`;
+							options.appendChild(newOption);
+					});
+					var selectedVoiceFromCookie = getCookie("selectedVoice");
+					if (selectedVoiceFromCookie) {
+						document.getElementById("voice-options-dropdown").value = selectedVoiceFromCookie; 
+						selectedVoice = selectedVoiceFromCookie;
+					}
+				}
+			});
+		}
+
+		function voiceOptionsDropdown_onChange (e) {
+			selectedVoice = document.getElementById("voice-options-dropdown").value;
+			writeCookies("selectedVoice", selectedVoice);
+			speechStatusUpdate(`Setting speaker voice to ${selectedVoice}`, STATUS_ICONS.SETTING);
+		}
+
+		function audioOutputDeviceDropdown_onChange(e) {
+			selectedAudioDevice = document.getElementById("audio-devices-dropdown").value;
+			console.debug("Audio out set to: ", selectedAudioDevice);
+			writeCookies("selectedAudioDevice", selectedAudioDevice);
+			speechStatusUpdate(`Setting audio output device to ${selectedAudioDevice}`, STATUS_ICONS.SETTING);
+		}
+
+		function speechStatusUpdate(text, icon = STATUS_ICONS.LOADING) {
+			document.getElementById("status-icon").classList = icon;
+			document.getElementById("status-message").innerHTML = text + " - " + (new Date().toLocaleTimeString());
+		}
+
+		function syncVoiceAndCaptionsButton_onClick() {
+			let button = document.getElementById("syncVoiceAndCaptionsButton");
+			if (button.classList.value.includes("negative")) {
+				button.classList = button.classList.value.replace("negative", "positive");
+				delaySendingCaptions = true;
+				return;
+			} 
+			if (button.classList.value.includes("positive")) {
+				button.classList = button.classList.value.replace("positive", "negative");
+				delaySendingCaptions = false;
+				return;
+			} 
+		}
+
+		function manualEntry(){
+			final_transcript = document.getElementById("userinput").value;
+			document.getElementById("output").innerHTML = final_transcript;
+			document.getElementById("userinput").value = "";
+			last_manual_entry = final_transcript;
+			
+			try {
+				if (final_transcript!=""){
+					if (delaySendingCaptions === false)
+						sendMessageToCaptionNinja();
+				}
+			} catch(e){
+				final_transcript="";
+			}
+			
+		}
+	
+		//Audio Devices
+		(async () => {   
+			speechStatusUpdate("Retrieving audio devices", STATUS_ICONS.RECIEVE);
+			let devices = await navigator.mediaDevices.enumerateDevices()  
+			// await navigator.permissions.request( { name: "camera" } ); 
+			let options = document.getElementById("audio-devices-dropdown");
+			// let devices = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+			devices.forEach(device => {
+				if (device.kind === "audiooutput") {
+					let newOption = document.createElement("option");
+					newOption.setAttribute("value", device.deviceId);
+					newOption.innerHTML = device.label;
+					options.appendChild(newOption);
+				}
+			});
+
+			let selectedAudioDeviceFromCookie = getCookie("selectedAudioDevice");
+			if (selectedAudioDeviceFromCookie) {
+				selectedAudioDevice = selectedAudioDeviceFromCookie;
+				document.getElementById("audio-devices-dropdown").value = selectedAudioDeviceFromCookie;
+			}
+		})();
+
+		/*https://docs.aws.amazon.com/polly/latest/dg/voice-speed-vip.html*/
+		function RequestAudioQuery(text, speaker = DEFAULT_SPEAKERID) {
+			if (awsConnected === false) return;
+
+            // Create the JSON parameters for getSynthesizeSpeechUrl
+            var speechParams = {
+                OutputFormat: "mp3",
+                SampleRate: "16000",
+				Engine: "standard",
+                Text: "",
+                TextType: "text",
+                VoiceId: selectedVoice
+            };
+            speechParams.Text = text;
+
+            // Create the Polly service object and presigner object
+            var polly = new AWS.Polly({apiVersion: '2016-06-10'});
+            var signer = new AWS.Polly.Presigner(speechParams, polly)
+
+            // Create presigned URL of synthesized speech file
+            signer.getSynthesizeSpeechUrl(speechParams, function(error, url) {
+				if (error) {
+					speechStatusUpdate(error, STATUS_ICONS.ERROR);
+				} else {
+					speechStatusUpdate("Speech synthesized", STATUS_ICONS.RECIEVE);
+					//PLAY AUDIO
+					playSound(url);
+				}
+			});
+		}
+
+		function playSound(url) {
+			if (window.audio) { window.audio.pause(); } //TODO maybe implement a queue system instead of ending playback
+			if (delaySendingCaptions === true) {
+				sendMessageToCaptionNinja();
+			}
+			window.audio = new Audio();
+			window.audio.src = url;
+			window.audio.load();
+			window.audio.controls = true;
+			window.audio.volume = 1;
+			window.audio.onplaying = () => {
+				speechStatusUpdate("Playing voice", STATUS_ICONS.AUDIOOUT);
+			}
+			window.audio.onended = () => {
+				speechStatusUpdate("Voice playback completed", STATUS_ICONS.COMPLETE);
+				delete window.audio;
+			}
+
+			if (selectedAudioDevice) {
+				window.audio.setSinkId(selectedAudioDevice).then(r => {
+					window.audio.play();
+				});
+				return;
+			}
+
+			window.audio.play();
+		}
+
+		function updateURL(param, force = false) {
+			var para = param.split('=');
+			if (!(urlParams.has(para[0].toLowerCase()))) {
+				if (history.pushState) {
+
+					var arr = window.location.href.split('?');
+					var newurl;
+					if (arr.length > 1 && arr[1] !== '') {
+						newurl = window.location.href + '&' + param;
+					} else {
+						newurl = window.location.href + '?' + param;
+					}
+					window.history.pushState({ path: newurl }, '', newurl);
+				}
+			} else if (force) {
+				if (history.pushState) {
+					var href = new URL(window.location.href);
+					if (para.length == 1) {
+						href.searchParams.set(para[0].toLowerCase(), "");
+					} else {
+						href.searchParams.set(para[0].toLowerCase(), para[1]);
+					}
+					log(href.toString());
+					window.history.pushState({ path: href.toString() }, '', href.toString());
+				}
+			}
+		}
+
+		function getOverlayLink() {
+			navigator.clipboard.writeText("https://caption.ninja" + "/overlay?room=" + roomID).then(() => { speechStatusUpdate("Overlay link copied to clipboard", STATUS_ICONS.COMPLETE); }, () => { });
+		 }
+
+		//Polyfill URLSearchParams?
+		(function (w) {
+			w.URLSearchParams = w.URLSearchParams || function (searchString) {
+				var self = this;
+				self.searchString = searchString;
+				self.get = function (name) {
+					var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(self.searchString);
+					if (results == null) {
+						return null;
+					}
+					else {
+						return decodeURI(results[1]) || 0;
+					}
+				};
+			};
+
+		})(window);
+
+		var urlParams = new URLSearchParams(window.location.search);
+
+		var sanitize = function (string) {
+			var temp = document.createElement('div');
+			temp.innerText = string;
+			temp.innerText = temp.innerHTML;
+			temp = temp.textContent || temp.innerText || "";
+			temp = temp.substring(0, Math.min(temp.length, 500));
+			return temp.trim();
+		};
+
+		function generateStreamID() {
+			var text = "";
+			var possible = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+			for (var i = 0; i < 7; i++) {
+				text += possible.charAt(Math.floor(Math.random() * possible.length));
+			}
+			return text;
+		};
+		
+		function setupSocketConnectionWithAPI() {
+			speechStatusUpdate("Setting up connection with the Caption.Ninja server", STATUS_ICONS.SEND);
+
+			//Get the RoomID by parsing URL
+			if (urlParams.has("room"))  roomID = urlParams.get("room");
+			else if (urlParams.has("ROOM"))  roomID = urlParams.get("ROOM");
+			else {
+				roomID = generateStreamID();
+				updateURL("room=" + roomID);
+			}
+
+			if (urlParams.has("label")) label = urlParams.get("label");
+			
+			if (urlParams.has("lang")) myLang = urlParams.get("lang");
+			else updateURL("lang=" + myLang);
+
+			var url = document.URL.substr(0, document.URL.lastIndexOf('/'));
+
+			//Setup Socket to Communicate with Caption Ninja
+
+			if (urlParams.has("pie")) {
+				// get an API key from https://www.piesocket.com/ for a free API server of your own (pie no longer is free? sorry)
+				var apiKey = urlParams.get("pie") || "0khtlN7R7ISHZzFiyfK49Q9zAm93Wti5xpbW9qjg"; 
+				socket = new WebSocket("wss://free3.piesocket.com/v3/" + roomID + "?api_key=" + apiKey);
+			}
+
+			socket.onclose = function () {
+				setTimeout(function () { window.location.reload(true); }, 100);
+			};
+
+			socket.onopen = function () {
+				socket.send(JSON.stringify({ "join": roomID }));
+			}
+		}
+
+		function setupWebkitSpeechRecognition() {
+			if ('webkitSpeechRecognition' in window) {
+				recognition = new webkitSpeechRecognition();
+				speechStatusUpdate("Attempting to start webkitSpeechRecognition", STATUS_ICONS.LOADING);
+				if (myLang) {
+					recognition.lang = myLang;
+				}
+				recognition.continuous = false;
+				recognition.interimResults = false;
+
+				recognition.onstart = function () {
+					speechStatusUpdate("WebSpeechRecognition has started", STATUS_ICONS.AUDIOIN);
+				};
+				recognition.onspeechstart = function () {
+					speechStatusUpdate("WebSpeechRecognition is listening", STATUS_ICONS.AUDIOIN);
+				};
+				recognition.onspeechend = function () {
+					speechStatusUpdate("WebSpeechRecognition is processing", STATUS_ICONS.LOADING);
+				};
+				recognition.onerror = function (event) {
+					console.debug("WebSpeechRecognition encountered an error", event);
+					speechStatusUpdate("WebSpeechRecognition encountered an error. Developer's console contains more information.", STATUS_ICONS.ERROR);
+				};
+				recognition.onend = function (event) {
+					console.debug("WebSpeechRecognition has stopped", event);
+					speechStatusUpdate("WebSpeechRecognition has stopped.", STATUS_ICONS.AUDIOINDISABLE);
+					if (!pauseSpeech) setupWebkitSpeechRecognition();
+				};
+				recognition.onresult = function (event) {
+					speechStatusUpdate("WebSpeechRecognition processed a result", STATUS_ICONS.RECIEVE);
+					counter += 1;
+					if (!event.results) {
+						speechStatusUpdate("WebSpeechRecognition recieved an empty result", STATUS_ICONS.ERROR);
+						return;
+					}
+
+					for (var i = event.resultIndex; i < event.results.length; ++i) {
+						if (event.results[i].isFinal) {
+							final_transcript += sanitize(event.results[i][0].transcript);
+						}
+					}
+
+					if (final_transcript) {
+						speechStatusUpdate("WebSpeechRecognition processed a transcription", STATUS_ICONS.COMPLETE);
+						console.debug("WebSpeechRecognition processed a transcription: ", final_transcript);
+
+						document.getElementById("output").innerHTML = "<span id='final_" + counter + "'>" + final_transcript + "</span><br />";
+						if (delaySendingCaptions === false) {
+							sendMessageToCaptionNinja();
+						} else {
+							RequestAudioQuery(final_transcript);
+						}
+						
+					} 
+				};
+				recognition.start();
+			}
+		}
+
+		function sendMessageToCaptionNinja(){
+			RequestAudioQuery(final_transcript);
+			try {
+				speechStatusUpdate("Sending message to the server", STATUS_ICONS.SEND);
+				if (label) {
+					socket.send(JSON.stringify({ "msg": true, "final": final_transcript, "id": counter, "label": label }));
+				} 
+				if (!label) {
+					socket.send(JSON.stringify({ "msg": true, "final": final_transcript, "id": counter }));
+				}
+				final_transcript = "";
+			} catch (ex) {
+				console.error("Encountered an error with sending message to the server.", ex);
+				speechStatusUpdate("Encountered an error with sending message to the server. Developer's console contains more information.", STATUS_ICONS.ERROR);
+			}
+		}
+
+		function microphonebutton_onclick() { 
+			//Determine state of button
+			let button = document.getElementById("microphonebutton");
+			if (button.classList.value.includes("negative")) {
+				button.classList = button.classList.value.replace("negative", "positive");
+				forceStopSpeechRecognition();
+				return;
+			} 
+			if (button.classList.value.includes("positive")) {
+				button.classList = button.classList.value.replace("positive", "negative");
+				forceStartSpeechRecognition();
+				return;
+			} 
+		}
+
+		function forceStartSpeechRecognition() { pauseSpeech = false; recognition.start(); }
+
+		function forceStopSpeechRecognition() { pauseSpeech = true; recognition.stop(); }
+
+		setupSocketConnectionWithAPI();
+
+		document.getElementById("userinput").addEventListener("keyup", function(event) { 
+			if (event.keyCode === 13) { manualEntry(); } 
+			if (event.keyCode === 38) { document.getElementById("userinput").value = last_manual_entry; } 
+		});
+
+		setupWebkitSpeechRecognition();
+
+		(() => {
+			let awsRegion = getCookie("awsRegion");
+			let awsCredentials = getCookie("awsCredentials");
+			if (awsRegion && awsCredentials)
+				initializeAWS(awsRegion, awsCredentials);
+		})();
+	</script>
+</body>
+
+</html>
