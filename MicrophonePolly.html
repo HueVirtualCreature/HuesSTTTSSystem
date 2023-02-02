@@ -144,6 +144,17 @@
 				  </div>
 			</div>
 		</div>
+
+		<div class="ui message transition">
+			<i class="close icon"></i>
+			<div class="header">
+				⚠️ Disclaimer
+			</div>
+			<p>
+				Amazon Polly is free up to 5 million characters per month for speech or Speech Marks requests, for the first 12 months, starting from your first request for speech. 
+				After that, they will probably automatically bill you. I am not responsible for any charges incurred. Read more here: https://aws.amazon.com/polly/pricing/
+			</p>
+		  </div>
 	</div>
 	
 	<script>
@@ -183,6 +194,15 @@
 		var final_transcript = '';
 		var awsConnected = false;
 		//Global Scope
+
+		$('.message .close')
+		.on('click', function() {
+			$(this)
+			.closest('.message')
+			.transition('fade')
+			;
+		})
+		;
 
 		async function awsConnectButton_onclick() {
 			let regionTextBoxValue = document.getElementById("awsRegionTextBox")?.value || null;
