@@ -11,7 +11,7 @@ export const setSelectedAudioDevice = (audioDevice) => {
     selectedAudioDevice = audioDevice;
 };
 
-export const audioOutputDeviceDropdown_onChange = (e) => {
+export const audioOutputDeviceDropdown_onChange = () => {
     selectedAudioDevice = document.getElementById("audio-devices-dropdown").value;
     console.debug("Audio out set to: ", selectedAudioDevice);
     writeCookies("selectedAudioDevice", selectedAudioDevice);
