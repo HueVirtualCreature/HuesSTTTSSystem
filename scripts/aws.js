@@ -6,6 +6,14 @@ import {playSound} from "./helpers/play-sound.js";
 
 const DEFAULT_SPEAKERID = "Matthew";
 const VOICE_LANGUAGES = "en-AU | en-GB | en-GB-WLS | en-IN | en-US | ja-JP";
+const BAD_VOICES = [
+    "Olivia",
+    "Arthur",
+    "Kajal",
+    "Kevin",
+    "Ruth",
+    "Steven"
+];
 
 let awsConnected = false;
 
@@ -80,6 +88,7 @@ const getAvailableSpeakers = () => {
         const options = document.getElementById("voice-options-dropdown");
         data.Voices
             .filter(voice => (VOICE_LANGUAGES).includes(voice.LanguageCode))
+            .filter(voice => !BAD_VOICES.find(bv => voice.Name.toLowerCase() === bv.toLowerCase()))
             .sort(dynamicSortMultiple("LanguageCode", "Name"))
             .forEach(voice => {
                 const newOption = document.createElement("option");

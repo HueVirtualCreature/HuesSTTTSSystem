@@ -85,9 +85,20 @@ function forceStartSpeechRecognition() { pauseSpeech = false; recognition.start(
 function forceStopSpeechRecognition() { pauseSpeech = true; recognition.stop(); }
 
 
-export const toggleVoiceRecognition = () => {
+export const toggleVoiceRecognition = (force, forceValue) => {
+    const button = document.getElementById("microphone-button");
+    if(force) {
+        if(forceValue){
+            button.classList = button.classList.value.replace("positive", "negative");
+            forceStartSpeechRecognition();
+            return;
+        }
+        button.classList = button.classList.value.replace("negative", "positive");
+        forceStopSpeechRecognition();
+        return;
+    }
+
     //Determine state of button
-    let button = document.getElementById("microphone-button");
     if (button.classList.value.includes("negative")) {
         button.classList = button.classList.value.replace("negative", "positive");
         forceStopSpeechRecognition();

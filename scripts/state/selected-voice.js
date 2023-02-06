@@ -11,7 +11,7 @@ export const setSelectedVoice = (sv) => {
     selectedVoice = sv;
 };
 
-export const voiceOptionsDropdown_onChange = (e) => {
+export const voiceOptionsDropdown_onChange = () => {
     selectedVoice = document.getElementById("voice-options-dropdown").value;
     writeCookies("selectedVoice", selectedVoice);
     speechStatusUpdate(`Setting speaker voice to ${selectedVoice}`, STATUS_ICONS.SETTING);
