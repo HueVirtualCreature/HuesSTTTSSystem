@@ -78,7 +78,7 @@
 							<option value="default">Please Select an Audio Output Device</option>
 						</select>
 						<h5>* Will use browser's default audio device if there is no selection</h5>
-						<select class="ui dropdown" id="voice-options-dropdown"">
+						<select class="ui dropdown" id="voice-options-dropdown">
 							<option value="default">Please Select a Voice</option>
 						</select>
 					</div>
@@ -123,8 +123,11 @@
 						<li><b>randomVoice</b> chooses a random voice</li>
 					</ul>
 				</p>
-				<div class="ui labeled input fluid">
-					<button class="ui button blue" id="websocket-toggle-button">Turn Websocket ON</button>
+				<div class="ui labeled input fluid" style="align-items: center">
+					<div style="margin-right: 20px;" id="rtc-caption">
+						RTC is currently ON
+					</div>
+					<button class="ui button negative" id="rtc-toggle-button">Turn RTC OFF</button>
 				</div>
 			</div>
 		</div>

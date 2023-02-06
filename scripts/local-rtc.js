@@ -3,22 +3,44 @@ import {toggleVoiceRecognition} from './voice-recognition.js';
 import {voiceOptionsDropdown_onChange} from './state/selected-voice.js';
 import {connectAws} from "./aws.js";
 import {audioOutputDeviceDropdown_onChange} from './state/selected-audio-device.js';
+import {getCookie, writeCookies} from "./helpers/cookies.js";
 // read/write from cookie as to state
 // init the connection if cookie says so.
 // have the connection alive
 // do the thing if the websocket happens
 
-let rtcOn = false;
+let rtcOn = true;
 
-const rtcToggleButton = document.getElementById('websocket-toggle-button');
+const rtcToggleButton = document.getElementById('rtc-toggle-button');
+const rtcCaption = document.getElementById('rtc-caption');
+
+const updateButtonUIAndCookies = () => {
+    writeCookies('rtcOn', rtcOn);
+    if(rtcOn){
+        rtcToggleButton.className = 'ui button negative';
+        rtcToggleButton.innerText = 'Turn RTC OFF';
+        rtcCaption.innerText = 'RTC is currently ON';
+        return;
+    }
+    rtcToggleButton.className = 'ui button POSITIVE';
+    rtcToggleButton.innerText = 'Turn RTC ON';
+    rtcCaption.innerText = 'RTC is currently OFF';
+};
+
+rtcToggleButton.onclick = () => {
+    rtcOn = !rtcOn;
+    updateButtonUIAndCookies();
+};
 
 export const initLocalRTC = () => {
-    //read from cookie
-    //update UI
+    if(getCookie('rtcOn') === 'false'){
+        rtcOn = false;
+        updateButtonUIAndCookies();
+    }
     initRTC((event) => {
-        // if(!rtcOn){
-        //     return;
-        // }
+        if(!rtcOn){
+            return;
+        }
         const {type} = event;
         if(type === 'start'){
             toggleVoiceRecognition(true, true);
