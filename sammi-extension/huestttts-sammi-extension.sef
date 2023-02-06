@@ -1,13 +1,52 @@
+[extension_name]
+HueSTTTS Sammi Extension
+
+[extension_info]
+version 0.0.1 by Swolekat
+[insert_external]
+
+[insert_command]
+SAMMI.extCommand("HueSTTTS Start", color = 3355443, height = 52,
+    {}
+);
+
+SAMMI.extCommand("HueSTTTS Stop", color = 3355443, height = 52,
+    {}
+);
+
+SAMMI.extCommand("HueSTTTS Random Voice", color = 3355443, height = 52,
+    {}
+);
+
+SAMMI.extCommand("HueSTTTS Setup", color = 3355443, height = 52,
+    {
+        region: ["AWS Region", 14, "", null, []],
+        identity: ["AWS Identity Pool", 14, "", null, []],
+        audioDevice: ["Audio Device", 14, "", null, []],
+    }
+);
+initRTC();
+[insert_hook]
+case "HueSTTTS Start":{
+    start();
+} break
+case "HueSTTTS Stop":{
+    stop();
+} break
+case "HueSTTTS Random Voice":{
+    randomVoice();
+} break
+case "HueSTTTS Setup":{
+    setup(SAMMIJSON);
+} break
+[insert_script]
+
 const BROADCAST_CHANNEL = 'huestttssytem';
 
 const signaling = new BroadcastChannel(BROADCAST_CHANNEL);
 let peerConnection;
 
-export const getSignaling = () => {
-    return signaling;
-};
-
-const createPeerConnection = () => {
+function createPeerConnection () {
     peerConnection = new RTCPeerConnection();
     peerConnection.onicecandidate = e => {
         const message = {
@@ -23,7 +62,7 @@ const createPeerConnection = () => {
     };
 }
 
-const handleOffer = async (offer) => {
+async function handleOffer (offer) {
     if (peerConnection) {
         console.error('existing peerconnection');
         return;
@@ -34,9 +73,9 @@ const handleOffer = async (offer) => {
     const answer = await peerConnection.createAnswer();
     signaling.postMessage({type: 'answer', sdp: answer.sdp});
     await peerConnection.setLocalDescription(answer);
-};
+}
 
-const handleAnswer = async (answer) => {
+async function handleAnswer (answer) {
     if (!peerConnection) {
         console.error('no peerconnection');
         return;
@@ -44,7 +83,7 @@ const handleAnswer = async (answer) => {
     await peerConnection.setRemoteDescription(answer);
 }
 
-const handleCandidate = async (candidate) => {
+async function handleCandidate (candidate) {
     if (!peerConnection) {
         console.error('no peerconnection');
         return;
@@ -56,7 +95,7 @@ const handleCandidate = async (candidate) => {
     await peerConnection.addIceCandidate(candidate);
 }
 
-const init = async () => {
+async function init () {
     await createPeerConnection();
 
     const offer = await peerConnection.createOffer();
@@ -64,7 +103,7 @@ const init = async () => {
     await peerConnection.setLocalDescription(offer);
 }
 
-export const initRTC = (additionalHandlers) => {
+function initRTC () {
     signaling.onmessage = e => {
         const {type} = e.data;
         if(type === 'offer'){
@@ -83,11 +122,25 @@ export const initRTC = (additionalHandlers) => {
             init(e.data);
             return;
         }
-        if(additionalHandlers){
-            additionalHandlers(e.data);
-            return;
-        }
         console.log('unhandled', e);
     };
     signaling.postMessage({type: 'ready'});
-};
+}
+
+function startRTC(){
+    initRTC();
+}
+
+function start() {
+    signaling.postMessage({type: 'start'});
+}
+function stop() {
+    signaling.postMessage({type: 'stop'});
+}
+function randomVoice() {
+    signaling.postMessage({type: 'randomVoice'});
+}
+function setup(json) {
+    signaling.postMessage({type: 'setup', region: json.region, identity: json.identity, audioDevice: json.audioDevice});
+}
+[insert_over]

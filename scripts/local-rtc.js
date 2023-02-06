@@ -4,10 +4,6 @@ import {voiceOptionsDropdown_onChange} from './state/selected-voice.js';
 import {connectAws} from "./aws.js";
 import {audioOutputDeviceDropdown_onChange} from './state/selected-audio-device.js';
 import {getCookie, writeCookies} from "./helpers/cookies.js";
-// read/write from cookie as to state
-// init the connection if cookie says so.
-// have the connection alive
-// do the thing if the websocket happens
 
 let rtcOn = true;
 
