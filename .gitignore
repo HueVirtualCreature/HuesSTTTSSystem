@@ -1,3 +1,4 @@
 *.pem
 *.bat
 .idea/
+sammi-extension/node_modules/

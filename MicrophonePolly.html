@@ -112,22 +112,25 @@
 		<div translate="no" class="row">
 			<div class="eight wide column">
 				<h3>
-					Local RTC Connection (by Swolekat)
+					Local Websocket (by Swolekat)
 				</h3>
 				<p>
 					Allow local programs to interface with this UI programmatically. They will be able to send the following messages:
 					<ul>
-						<li><b>setup</b> sets aws region, identity pool, and audio device</li>
 						<li><b>start</b> starts the speech recognition</li>
 						<li><b>stop</b> stops the speech recognition</li>
 						<li><b>randomVoice</b> chooses a random voice</li>
 					</ul>
 				</p>
+				<p>
+					If you are using the SAMMI extension, use localhost:61112
+				</p>
+				<div style="margin-right: 20px;" id="websocket-caption">
+					Local Websocket currently OFF
+				</div>
 				<div class="ui labeled input fluid" style="align-items: center">
-					<div style="margin-right: 20px;" id="rtc-caption">
-						RTC is currently ON
-					</div>
-					<button class="ui button negative" id="rtc-toggle-button">Turn RTC OFF</button>
+					<input type="text" id="websocket-address" placeholder="Websocket URL">
+					<button class="ui button positive" id="websocket-toggle-button">Turn Websockets ON</button>
 				</div>
 			</div>
 		</div>

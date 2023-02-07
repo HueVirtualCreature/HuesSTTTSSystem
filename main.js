@@ -4,14 +4,14 @@ import {setupSocketConnectionWithAPI} from './scripts/caption-ninja.js';
 import {setupWebkitSpeechRecognition} from './scripts/voice-recognition.js';
 import {initAudioDevices} from "./scripts/audio-devices.js";
 import {initializeAWS} from './scripts/aws.js';
-import {initLocalRTC} from './scripts/local-rtc.js';
+import {initLocalWebsockets} from './scripts/local-websocket.js';
 
 (async () => {
     await initAudioDevices();
     setUpEventHandlers();
     setupSocketConnectionWithAPI();
     setupWebkitSpeechRecognition();
-    initLocalRTC();
+    initLocalWebsockets();
 
     let awsRegion = getCookie("awsRegion");
     let awsCredentials = getCookie("awsCredentials");
