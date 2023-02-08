@@ -8,4 +8,6 @@ Lots of changes:
 * Added SAMMI extension
   * uses the websocket connection to send signals to the app.
   * Needs to run a small server (./sammi-extension/node.js) to host files, host api, and run a websocket server
-  * 
+  * Server starts whenever obs is connected
+  * Init gets the latest files from the github
+  * Installation requires windows 10 or greater.

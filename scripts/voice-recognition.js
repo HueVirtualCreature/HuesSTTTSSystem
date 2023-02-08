@@ -5,12 +5,14 @@ import {getCounter, incrementCounter} from './state/counter.js';
 import {getDelaySendingCaptions} from "./state/delay-sending-captions.js";
 import {sendMessageToCaptionNinja} from './caption-ninja.js';
 import {RequestAudioQuery} from './aws.js'
+import {getCookie, writeCookies} from "./helpers/cookies.js";
 
+const VOICE_RECOGNITION_ON_COOKIE = 'voiceRecognitionOn';
 
 let recognition;
 let pauseSpeech = false;
 
-const sanitize =  (string) => {
+const sanitize = (string) => {
     let temp = document.createElement('div');
     temp.innerText = string;
     temp.innerText = temp.innerHTML;
@@ -23,6 +25,9 @@ export const setupWebkitSpeechRecognition = () => {
     if (!'webkitSpeechRecognition' in window) {
         return;
     }
+
+    const shouldStartVoiceRecognition = getCookie(VOICE_RECOGNITION_ON_COOKIE) !== 'false';
+    pauseSpeech = !shouldStartVoiceRecognition;
 
     recognition = new webkitSpeechRecognition();
     speechStatusUpdate("Attempting to start webkitSpeechRecognition", STATUS_ICONS.LOADING);
@@ -78,17 +83,30 @@ export const setupWebkitSpeechRecognition = () => {
         RequestAudioQuery(getFinalTranscript());
     };
     recognition.start();
+    if (pauseSpeech) {
+        const button = document.getElementById("microphone-button");
+        button.classList = button.classList.value.replace("negative", "positive");
+        recognition.stop();
+    }
 }
 
-function forceStartSpeechRecognition() { pauseSpeech = false; recognition.start(); }
+function forceStartSpeechRecognition() {
+    pauseSpeech = false;
+    recognition.start();
+    writeCookies(VOICE_RECOGNITION_ON_COOKIE, !pauseSpeech);
+}
 
-function forceStopSpeechRecognition() { pauseSpeech = true; recognition.stop(); }
+function forceStopSpeechRecognition() {
+    pauseSpeech = true;
+    recognition.stop();
+    writeCookies(VOICE_RECOGNITION_ON_COOKIE, !pauseSpeech);
+}
 
 
-export const toggleVoiceRecognition = (force, forceValue) => {
+export const toggleVoiceRecognition = (event, force, forceValue) => {
     const button = document.getElementById("microphone-button");
-    if(force) {
-        if(forceValue){
+    if (force) {
+        if (forceValue) {
             button.classList = button.classList.value.replace("positive", "negative");
             forceStartSpeechRecognition();
             return;

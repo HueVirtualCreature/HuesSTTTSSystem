@@ -58,11 +58,11 @@ const initWebsocketConnection = () => {
         const event = JSON.parse(e.data);
         const {type} = event;
         if(type === 'start'){
-            toggleVoiceRecognition(true, true);
+            toggleVoiceRecognition(undefined, true, true);
             return;
         }
         if(type === 'stop'){
-            toggleVoiceRecognition(true, false);
+            toggleVoiceRecognition(undefined, true, false);
             return;
         }
         if(type === 'randomVoice'){
