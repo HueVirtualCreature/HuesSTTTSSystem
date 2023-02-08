@@ -12,7 +12,8 @@ const BAD_VOICES = [
     "Kajal",
     "Kevin",
     "Ruth",
-    "Steven"
+    "Steven",
+    "Tomoko",
 ];
 
 let awsConnected = false;

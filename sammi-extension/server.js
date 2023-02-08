@@ -3,9 +3,21 @@ const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
 
+const LOG_PATH = path.join(__dirname, '/log.txt');
+let hasWrittenToLog = false;
+
+const writeToLog = (message) => {
+    if(!hasWrittenToLog){
+        fs.writeFileSync(LOG_PATH, '');
+        hasWrittenToLog = true;
+    }
+    console.log(message);
+    fs.appendFileSync(LOG_PATH, `${message}\n`);
+};
+
 const websocketServer = new WebSocket.Server({port: 61112});
 websocketServer.on('connection', () => {
-    console.log('client connected');
+    writeToLog('client connected');
 });
 
 const getContentTypeForFileName = (fileName) => {
@@ -21,12 +33,15 @@ const getContentTypeForFileName = (fileName) => {
 };
 
 const handleFileRoute = (filePath, response) => {
-    if(!fs.existsSync(filePath)){
+    const normalizedPath = path.join(__dirname, filePath);
+    if(!fs.existsSync(normalizedPath)){
+        writeToLog(`Couldn't find ${normalizedPath}`);
         response.writeHead(404);
         return;
     }
+    writeToLog(`Serving up ${normalizedPath}`);
     response.writeHead(200, { 'Content-Type': getContentTypeForFileName(filePath)});
-    response.end(fs.readFileSync(filePath), 'utf8');
+    response.end(fs.readFileSync(normalizedPath), 'utf8');
 };
 
 const sendWebsocketMessage = (messageToSend) => {
@@ -46,19 +61,19 @@ const sendSuccessData = (response) => {
 http.createServer(function (request, response) {
     const sanitizedUrl = request.url.split('?')[0];
     if(request.url === '/start'){
-        console.log('start request');
+        writeToLog('start request');
         sendWebsocketMessage(JSON.stringify({type: 'start'}));
         sendSuccessData(response);
         return;
     }
     if(request.url === '/stop'){
-        console.log('stop request');
+        writeToLog('stop request');
         sendWebsocketMessage(JSON.stringify({type: 'stop'}));
         sendSuccessData(response);
         return;
     }
     if(request.url === '/randomVoice'){
-        console.log('random voice request');
+        writeToLog('random voice request');
         sendWebsocketMessage(JSON.stringify({type: 'randomVoice'}));
         sendSuccessData(response);
         return;
@@ -71,5 +86,5 @@ http.createServer(function (request, response) {
     handleFileRoute(filePath, response);
 
 }).listen(61111);
-console.log('Server running at http://127.0.0.1:61111/');
-console.log('Websocket Server running at http://127.0.0.1:61112/');
+writeToLog('Server running at http://127.0.0.1:61111/');
+writeToLog('Websocket Server running at http://127.0.0.1:61112/');

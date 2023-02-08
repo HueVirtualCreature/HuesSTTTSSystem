@@ -32,13 +32,13 @@ case "HueSTTTS Setup":{
 } break
 [insert_script]
 function start() {
-    fetch('localhost:61111/start');
+    fetch('http://localhost:61111/start');
 }
 function stop() {
-    fetch('localhost:61111/stop');
+    fetch('http://localhost:61111/stop');
 }
 function randomVoice() {
-    fetch('localhost:61111/randomVoice');
+    fetch('http://localhost:61111/randomVoice');
 }
 
 [insert_over]
