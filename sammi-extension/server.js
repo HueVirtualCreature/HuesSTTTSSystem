@@ -20,30 +20,6 @@ websocketServer.on('connection', () => {
     writeToLog('client connected');
 });
 
-const getContentTypeForFileName = (fileName) => {
-    const extname = path.extname(fileName);
-    if(extname === '.js'){
-        return 'text/javascript';
-    }
-    if(extname === '.css'){
-        return 'text/css';
-    }
-
-    return 'text/html';
-};
-
-const handleFileRoute = (filePath, response) => {
-    const normalizedPath = path.join(__dirname, filePath);
-    if(!fs.existsSync(normalizedPath)){
-        writeToLog(`Couldn't find ${normalizedPath}`);
-        response.writeHead(404);
-        return;
-    }
-    writeToLog(`Serving up ${normalizedPath}`);
-    response.writeHead(200, { 'Content-Type': getContentTypeForFileName(filePath)});
-    response.end(fs.readFileSync(normalizedPath), 'utf8');
-};
-
 const sendWebsocketMessage = (messageToSend) => {
     websocketServer.clients.forEach(client => {
         if (client.readyState !== WebSocket.OPEN) {
@@ -78,13 +54,7 @@ http.createServer(function (request, response) {
         sendSuccessData(response);
         return;
     }
-
-    let filePath = '..' + sanitizedUrl;
-    if (filePath === '../'){
-        filePath = '../MicrophonePolly.html';
-    }
-    handleFileRoute(filePath, response);
-
+    response.writeHead(404);
 }).listen(61111);
 writeToLog('Server running at http://127.0.0.1:61111/');
 writeToLog('Websocket Server running at http://127.0.0.1:61112/');
