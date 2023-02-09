@@ -1,9 +1,9 @@
 import {getCookie} from "./helpers/cookies.js";
-import { speechStatusUpdate, STATUS_ICONS} from './speech-status.js';
+import { updateStatusIcon, STATUS_ICONS} from './status-icon.js';
 import {setSelectedAudioDevice} from "./state/selected-audio-device.js";
 
 export const initAudioDevices = async() => {
-        speechStatusUpdate("Retrieving audio devices", STATUS_ICONS.RECIEVE);
+        updateStatusIcon("Retrieving audio devices", STATUS_ICONS.RECIEVE);
         const devices = await navigator.mediaDevices.enumerateDevices()
         const options = document.getElementById("audio-devices-dropdown");
         devices.forEach(device => {

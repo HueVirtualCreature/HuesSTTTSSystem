@@ -1,6 +1,6 @@
 import {getDelaySendingCaptions} from "../state/delay-sending-captions.js";
 import {sendMessageToCaptionNinja} from "../caption-ninja.js";
-import {speechStatusUpdate, STATUS_ICONS} from "../speech-status.js";
+import {updateStatusIcon, STATUS_ICONS} from "../status-icon.js";
 import {getSelectedAudioDevice} from "../state/selected-audio-device.js";
 
 export const playSound = (url) => {
@@ -14,10 +14,10 @@ export const playSound = (url) => {
     window.audio.controls = true;
     window.audio.volume = 1;
     window.audio.onplaying = () => {
-        speechStatusUpdate("Playing voice", STATUS_ICONS.AUDIOOUT);
+        updateStatusIcon("Playing voice", STATUS_ICONS.AUDIOOUT);
     }
     window.audio.onended = () => {
-        speechStatusUpdate("Voice playback completed", STATUS_ICONS.COMPLETE);
+        updateStatusIcon("Voice playback completed", STATUS_ICONS.COMPLETE);
         delete window.audio;
     }
 

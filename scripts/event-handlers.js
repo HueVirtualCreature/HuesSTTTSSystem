@@ -7,6 +7,7 @@ import {voiceOptionsDropdown_onChange} from "./state/selected-voice.js";
 import {manualEntry} from "./manual-entry.js";
 
 export const setUpEventHandlers = () => {
+    $('.ui.accordion').accordion();
     $('.message .close')
         .on('click', function() {
             $(this)

@@ -53,6 +53,18 @@
 				</div>
 			</div>
 		</div>
+		<div class="sixteen wide column">
+			<div class="ui message transition">
+				<i class="close icon"></i>
+				<div class="header">
+					⚠️ Disclaimer
+				</div>
+				<p>
+					Amazon Polly is free up to 5 million characters per month for speech or Speech Marks requests, for the first 12 months, starting from your first request for speech.
+					After that, they will probably automatically bill you. I am not responsible for any charges incurred. Read more here: https://aws.amazon.com/polly/pricing/
+				</p>
+			</div>
+		</div>
 		<div class="row">
 			<div class="sixteen wide column"  translate="no">
 				<div class="ui fluid card">
@@ -98,7 +110,7 @@
 		</div>
 		<div class="ui divider"></div>
 		<div translate="no" class="row">
-			<div class="eight wide column">
+			<div class="sixteen wide column">
 				<div class="ui icon message">
 					<i id="status-icon" class="notched circle loading icon"></i>
 					<div class="content">
@@ -109,42 +121,33 @@
 		</div>
 
 		<div class="ui divider"></div>
-		<div translate="no" class="row">
-			<div class="eight wide column">
-				<h3>
+		<div class="sixteen wide column">
+			<div class="ui accordion styled fluid">
+				<div class="title" style="font-size: 1.28571429em">
 					Local Websocket (by Swolekat)
-				</h3>
-				<p>
-					Allow local programs to interface with this UI programmatically. They will be able to send the following messages:
+				</div>
+				<div class="content">
+					<p>
+						Allow local programs to interface with this UI programmatically. They will be able to send the following messages:
 					<ul>
 						<li><b>start</b> starts the speech recognition</li>
 						<li><b>stop</b> stops the speech recognition</li>
 						<li><b>randomVoice</b> chooses a random voice</li>
 					</ul>
-				</p>
-				<p>
-					If you are using the SAMMI extension, use localhost:61112
-				</p>
-				<div style="margin-right: 20px;" id="websocket-caption">
-					Local Websocket currently OFF
-				</div>
-				<div class="ui labeled input fluid" style="align-items: center">
-					<input type="text" id="websocket-address" placeholder="Websocket URL">
-					<button class="ui button positive" id="websocket-toggle-button">Turn Websockets ON</button>
+					</p>
+					<p>
+						If you are using the SAMMI extension, use localhost:61112
+					</p>
+					<div style="margin-right: 20px;" id="websocket-caption">
+						Local Websocket currently OFF
+					</div>
+					<div class="ui labeled input fluid" style="align-items: center">
+						<input type="text" id="websocket-address" placeholder="Websocket URL">
+						<button class="ui button positive" id="websocket-toggle-button">Turn Websockets ON</button>
+					</div>
 				</div>
 			</div>
 		</div>
-
-		<div class="ui message transition">
-			<i class="close icon"></i>
-			<div class="header">
-				⚠️ Disclaimer
-			</div>
-			<p>
-				Amazon Polly is free up to 5 million characters per month for speech or Speech Marks requests, for the first 12 months, starting from your first request for speech. 
-				After that, they will probably automatically bill you. I am not responsible for any charges incurred. Read more here: https://aws.amazon.com/polly/pricing/
-			</p>
-		  </div>
 	</div>
 	
 	<script src="./main.js" type="module" ></script>

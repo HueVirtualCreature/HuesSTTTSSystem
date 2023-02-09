@@ -1,5 +1,5 @@
 import {setFinalTranscript, getFinalTranscript} from "./state/final-transcript.js";
-import {speechStatusUpdate, STATUS_ICONS} from "./speech-status.js";
+import {updateStatusIcon, STATUS_ICONS} from "./status-icon.js";
 import {updateURL} from "./helpers/url.js";
 import {getMyLanguage, setMyLanguage} from "./state/my-language.js";
 import {getCounter} from "./state/counter.js";
@@ -32,7 +32,7 @@ const getRoomId = () => {
 };
 
 export const setupSocketConnectionWithAPI = () => {
-    speechStatusUpdate("Setting up connection with the Caption.Ninja server", STATUS_ICONS.SEND);
+    updateStatusIcon("Setting up connection with the Caption.Ninja server", STATUS_ICONS.SEND);
     const roomID = getRoomId();
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -69,7 +69,7 @@ export const sendMessageToCaptionNinja = () => {
     const finalTranscript = getFinalTranscript();
     RequestAudioQuery(finalTranscript);
     try {
-        speechStatusUpdate("Sending message to the server", STATUS_ICONS.SEND);
+        updateStatusIcon("Sending message to the server", STATUS_ICONS.SEND);
         const counter = getCounter();
         if (label) {
             socket.send(JSON.stringify({ "msg": true, "final": finalTranscript, "id": counter, "label": label }));
@@ -80,10 +80,10 @@ export const sendMessageToCaptionNinja = () => {
         setFinalTranscript('');
     } catch (ex) {
         console.error("Encountered an error with sending message to the server.", ex);
-        speechStatusUpdate("Encountered an error with sending message to the server. Developer's console contains more information.", STATUS_ICONS.ERROR);
+        updateStatusIcon("Encountered an error with sending message to the server. Developer's console contains more information.", STATUS_ICONS.ERROR);
     }
 }
 
 export const getOverlayLink = () => {
-    navigator.clipboard.writeText("https://caption.ninja" + "/overlay?room=" + getRoomId()).then(() => { speechStatusUpdate("Overlay link copied to clipboard", STATUS_ICONS.COMPLETE); }, () => { });
+    navigator.clipboard.writeText("https://caption.ninja" + "/overlay?room=" + getRoomId()).then(() => { updateStatusIcon("Overlay link copied to clipboard", STATUS_ICONS.COMPLETE); }, () => { });
 }

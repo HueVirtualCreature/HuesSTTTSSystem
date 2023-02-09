@@ -10,7 +10,7 @@ export const STATUS_ICONS = {
     COMPLETE: "green check circle outline icon"
 };
 
-export const speechStatusUpdate = (text, icon = STATUS_ICONS.LOADING) => {
+export const updateStatusIcon = (text, icon = STATUS_ICONS.LOADING) => {
     document.getElementById("status-icon").classList = icon;
     document.getElementById("status-message").innerHTML = `${text} - ${(new Date().toLocaleTimeString())}`;
 }

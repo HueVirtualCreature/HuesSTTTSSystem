@@ -1,4 +1,4 @@
-let myLanguage = 'Matthew';
+let myLanguage = 'en-US';
 
 export const getMyLanguage = () => {
     return myLanguage;

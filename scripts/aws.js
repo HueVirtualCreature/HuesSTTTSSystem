@@ -1,4 +1,4 @@
-import {speechStatusUpdate, STATUS_ICONS} from "./speech-status.js";
+import {updateStatusIcon, STATUS_ICONS} from "./status-icon.js";
 import {getCookie, writeCookies} from "./helpers/cookies.js";
 import {getSelectedVoice, setSelectedVoice} from "./state/selected-voice.js";
 import {dynamicSortMultiple} from './helpers/dynamic-sort.js';
@@ -40,10 +40,10 @@ export const RequestAudioQuery = (text, speaker = DEFAULT_SPEAKERID) => {
     // Create presigned URL of synthesized speech file
     signer.getSynthesizeSpeechUrl(speechParams, function(error, url) {
         if (error) {
-            speechStatusUpdate(error, STATUS_ICONS.ERROR);
+            updateStatusIcon(error, STATUS_ICONS.ERROR);
             return;
         }
-        speechStatusUpdate("Speech synthesized", STATUS_ICONS.RECIEVE);
+        updateStatusIcon("Speech synthesized", STATUS_ICONS.RECIEVE);
         playSound(url);
     });
 }
@@ -57,7 +57,7 @@ export const connectAws = async () =>  {
 }
 
 export const initializeAWS = (region, identityPoolID) => {
-    speechStatusUpdate("Setting AWS Config", STATUS_ICONS.SETTING);
+    updateStatusIcon("Setting AWS Config", STATUS_ICONS.SETTING);
 
     // Initialize the Amazon Cognito credentials provider
     AWS.config.region = region;
@@ -75,17 +75,17 @@ export const initializeAWS = (region, identityPoolID) => {
 const getAvailableSpeakers = () => {
     if (awsConnected === false) return;
 
-    speechStatusUpdate("Retrieving AWS Polly voices", STATUS_ICONS.RECIEVE);
+    updateStatusIcon("Retrieving AWS Polly voices", STATUS_ICONS.RECIEVE);
     // Create the Polly service object and presigner object
     const polly = new AWS.Polly({apiVersion: '2016-06-10'});
 
     polly.describeVoices({}, function(err, data) {
         if (err) {
-            speechStatusUpdate(`Failed to retrieve available voices from server`, STATUS_ICONS.ERROR);
+            updateStatusIcon(`Failed to retrieve available voices from server`, STATUS_ICONS.ERROR);
             console.log(err, err.stack);
             return;
         }
-        speechStatusUpdate(`Retrieved available voices from server`, STATUS_ICONS.RECIEVE);
+        updateStatusIcon(`Retrieved available voices from server`, STATUS_ICONS.RECIEVE);
         const options = document.getElementById("voice-options-dropdown");
         data.Voices
             .filter(voice => (VOICE_LANGUAGES).includes(voice.LanguageCode))

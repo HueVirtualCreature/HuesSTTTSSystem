@@ -1,5 +1,5 @@
 import {writeCookies} from "../helpers/cookies.js";
-import {speechStatusUpdate, STATUS_ICONS} from '../speech-status.js';
+import {updateStatusIcon, STATUS_ICONS} from '../status-icon.js';
 
 let selectedVoice = 'Matthew';
 
@@ -14,5 +14,5 @@ export const setSelectedVoice = (sv) => {
 export const voiceOptionsDropdown_onChange = () => {
     selectedVoice = document.getElementById("voice-options-dropdown").value;
     writeCookies("selectedVoice", selectedVoice);
-    speechStatusUpdate(`Setting speaker voice to ${selectedVoice}`, STATUS_ICONS.SETTING);
+    updateStatusIcon(`Setting speaker voice to ${selectedVoice}`, STATUS_ICONS.SETTING);
 }
