@@ -94,3 +94,11 @@ Lastly, you need to allow microphone permissions when the page loads. Immediatel
   
 
 Feel free to play with the buttons. You can't really break anything here.
+
+
+### SAMMI extension
+If you want, you can use the sammi extension to turn on/off the tts automatically. You will need to have node installed and be on windows 10 or greater.
+
+Install the sef file and you'll see a new deck. Run the init button once, then restart sammi. Every time sammi connects to obs it will start the server.
+
+When the server is running you can go to http://localhost:61111/ to load the UI (make sure to do this in chrome). You'll need to do the regular set up AND you need to make sure you enable the websocket connection. For the value of the websockets set it to `localhost:61112`. Then you should be off to the races!
