@@ -5,7 +5,7 @@ import {dynamicSortMultiple} from './helpers/dynamic-sort.js';
 import {playSound} from "./helpers/play-sound.js";
 
 const DEFAULT_SPEAKERID = "Matthew";
-const VOICE_LANGUAGES = "en-AU | en-GB | en-GB-WLS | en-IN | en-US | ja-JP";
+const VOICE_LANGUAGES = "en-AU | en-GB | en-GB-WLS | en-IN | en-US | ja-JP | fr-FR";
 const BAD_VOICES = [
     "Olivia",
     "Arthur",
